@@ -4,7 +4,7 @@ import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { TicketsService } from '@/modules/tickets/tickets.service';
 import { MessageExchanges, MessageQueues } from '../../../enums';
 import { IEmailsEventsConsumer } from '../../../emails/interfaces/iemails-events.consumer';
-import { RabbitMqProducerService } from '@/infra/messages/brokers/rabbit-mq';
+// import { RabbitMqProducerService } from '@/infra/messages/brokers/rabbit-mq';
 
 @Controller()
 export class TicketsMessageRabbitMqConsumer implements IEmailsEventsConsumer {
@@ -14,7 +14,7 @@ export class TicketsMessageRabbitMqConsumer implements IEmailsEventsConsumer {
 
   constructor(
     private readonly ticketsService: TicketsService,
-    private readonly rabbitMqProducerService: RabbitMqProducerService,
+    // private readonly rabbitMqProducerService: RabbitMqProducerService,
   ) {}
 
   @EventPattern(MessageQueues.TICKET_GENERATE)
@@ -51,34 +51,34 @@ export class TicketsMessageRabbitMqConsumer implements IEmailsEventsConsumer {
       );
 
       if (retry_count < this.MAX_RETRIES) {
-        await this.rabbitMqProducerService.publish(
-          MessageExchanges.DLX,
-          `${MessageQueues.TICKET_GENERATE}.retry`,
-          {
-            pattern: MessageQueues.TICKET_GENERATE,
-            data: payload,
-          },
-          {
-            'x-retry-count': retry_count + 1,
-          },
-        );
+        // await this.rabbitMqProducerService.publish(
+        //   MessageExchanges.DLX,
+        //   `${MessageQueues.TICKET_GENERATE}.retry`,
+        //   {
+        //     pattern: MessageQueues.TICKET_GENERATE,
+        //     data: payload,
+        //   },
+        //   {
+        //     'x-retry-count': retry_count + 1,
+        //   },
+        // );
 
         this.logger.warn(
           `Message requeued to retry queue ${MessageQueues.TICKET_GENERATE}.retry for order_id=${payload.order_id}. Next retry=${retry_count + 1}`,
         );
       } else {
-        await this.rabbitMqProducerService.publish(
-          MessageExchanges.DLX,
-          `${MessageQueues.TICKET_GENERATE}.dlq`,
-          {
-            pattern: MessageQueues.TICKET_GENERATE,
-            data: payload,
-          },
-          {
-            'x-retry-count': retry_count,
-            'x-error-message': e?.message ?? 'Unknown error',
-          },
-        );
+        // await this.rabbitMqProducerService.publish(
+        //   MessageExchanges.DLX,
+        //   `${MessageQueues.TICKET_GENERATE}.dlq`,
+        //   {
+        //     pattern: MessageQueues.TICKET_GENERATE,
+        //     data: payload,
+        //   },
+        //   {
+        //     'x-retry-count': retry_count,
+        //     'x-error-message': e?.message ?? 'Unknown error',
+        //   },
+        // );
 
         this.logger.error(
           `Message sent to DLQ ${MessageQueues.TICKET_GENERATE}.dlq for order_id=${payload.order_id}`,

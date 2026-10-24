@@ -6,7 +6,7 @@ import {
   MessageExchanges,
   MessageQueues,
 } from '@/infra/messages/consumers/enums';
-import { RabbitMqProducerService } from '@/infra/messages/brokers/rabbit-mq';
+// import { RabbitMqProducerService } from '@/infra/messages/brokers/rabbit-mq';
 import { EmailsService } from '@/modules/emails/email.service';
 import { SendEmailMessageDto } from '@/modules/emails/dtos/send-email-message.dto';
 
@@ -17,7 +17,7 @@ export class EmailsMessageRabbitMqConsumer implements IEmailsEventsConsumer {
   private readonly MAX_RETRIES = 3;
 
   constructor(
-    private readonly rabbitMqProducerService: RabbitMqProducerService,
+    // private readonly rabbitMqProducerService: RabbitMqProducerService,
     private readonly emailsService: EmailsService,
   ) {}
 
@@ -50,34 +50,34 @@ export class EmailsMessageRabbitMqConsumer implements IEmailsEventsConsumer {
       );
 
       if (retry_count < this.MAX_RETRIES) {
-        await this.rabbitMqProducerService.publish(
-          MessageExchanges.DLX,
-          `${MessageQueues.EMAIL}.retry`,
-          {
-            pattern: MessageQueues.EMAIL,
-            data: payload,
-          },
-          {
-            'x-retry-count': retry_count + 1,
-          },
-        );
+        // await this.rabbitMqProducerService.publish(
+        //   MessageExchanges.DLX,
+        //   `${MessageQueues.EMAIL}.retry`,
+        //   {
+        //     pattern: MessageQueues.EMAIL,
+        //     data: payload,
+        //   },
+        //   {
+        //     'x-retry-count': retry_count + 1,
+        //   },
+        // );
 
         this.logger.warn(
           `Message requeued to retry queue ${MessageQueues.EMAIL}.retry for order_id=${payload.order_id}. Next retry=${retry_count + 1}`,
         );
       } else {
-        await this.rabbitMqProducerService.publish(
-          MessageExchanges.DLX,
-          `${MessageQueues.EMAIL}.dlq`,
-          {
-            pattern: MessageQueues.EMAIL,
-            data: payload,
-          },
-          {
-            'x-retry-count': retry_count,
-            'x-error-message': e?.message ?? 'Unknown error',
-          },
-        );
+        // await this.rabbitMqProducerService.publish(
+        //   MessageExchanges.DLX,
+        //   `${MessageQueues.EMAIL}.dlq`,
+        //   {
+        //     pattern: MessageQueues.EMAIL,
+        //     data: payload,
+        //   },
+        //   {
+        //     'x-retry-count': retry_count,
+        //     'x-error-message': e?.message ?? 'Unknown error',
+        //   },
+        // );
 
         this.logger.error(
           `Message sent to DLQ ${MessageQueues.EMAIL}.dlq for order_id=${payload.order_id}`,

@@ -7,17 +7,21 @@ import {
   TicketPdfGeneratorProvider,
   TicketStoragePathFactory,
 } from './providers';
-import { R2StorageService } from '@/infra/storage';
 import { AppHttpModule } from '@/infra/http/http.module';
 import { MessagesModule } from '@/infra/messages/messages.module';
+import { StorageModule } from '@/infra/storage/storage.module';
 
 @Module({
-  imports: [OrdersModule, AppHttpModule, forwardRef(() => MessagesModule)],
+  imports: [
+    OrdersModule,
+    AppHttpModule,
+    forwardRef(() => MessagesModule),
+    StorageModule,
+  ],
   providers: [
     TicketsService,
     TicketsRepository,
     TicketPdfGeneratorProvider,
-    R2StorageService,
     TicketStoragePathFactory,
   ],
   exports: [TicketsService],

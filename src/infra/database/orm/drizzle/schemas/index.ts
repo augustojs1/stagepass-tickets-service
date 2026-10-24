@@ -1,6 +1,6 @@
 export * from '@/infra/database/orm/drizzle/schemas/category.entity';
 export * from '@/infra/database/orm/drizzle/schemas/event-images.entity';
-export * from '@/modules/event-ticket-reservations/entities/event-tickets-reservations.entity';
+export * from '@/infra/database/orm/drizzle/schemas/event-tickets-reservations.entity';
 export * from '@/infra/database/orm/drizzle/schemas/event.entity';
 export * from '@/infra/database/orm/drizzle/schemas/event-tickets.entity';
 export * from '@/infra/database/orm/drizzle/schemas/order-item.entity';
@@ -8,7 +8,7 @@ export * from '@/infra/database/orm/drizzle/schemas/orders.entity';
 export * from '@/infra/database/orm/drizzle/schemas/users.entity';
 export * from '@/infra/database/orm/drizzle/schemas/users.entity';
 export * from '@/infra/database/orm/drizzle/schemas/countries.entity';
-export * from '@/modules/payment-orders/entities/payment-order.entity';
+export * from '@/infra/database/orm/drizzle/schemas/payment-order.entity';
 export * from '@/infra/database/orm/drizzle/schemas/payment-gateway-webhook-events.entity';
 export * from '@/modules/tickets/entities/ticket.entity';
 export * from '@/modules/emails/entities/email-templates.entity';

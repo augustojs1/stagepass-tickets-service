@@ -1,7 +1,7 @@
 {
-  "name": "stagepass-workers",
+  "name": "stagepass-tickets-service",
   "version": "0.0.1",
-  "description": "StagePass Workers handles background jobs like reservations expiration, automated PDF generation, payments processing and emails.",
+  "description": "StagePass Tickets Service handles background automated PDF generation.",
   "author": "Augusto Souza",
   "private": true,
   "license": "UNLICENSED",

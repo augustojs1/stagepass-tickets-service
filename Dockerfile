@@ -20,6 +20,6 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/src/infra/config/env/production.env ./src/infra/config/env/production.env
 COPY --from=build /app/package.json ./
 
-EXPOSE 8080
+EXPOSE 8800
 
 CMD ["npm", "run", "start:prod"]

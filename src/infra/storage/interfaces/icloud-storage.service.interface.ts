@@ -1,4 +1,4 @@
-import { PreSignedResponse } from './models';
+import { PreSignedResponse } from '../models';
 
 export abstract class ICloudStorageService {
   abstract getObject(key: string): Promise<void>;
