@@ -1,3 +1,3 @@
-export abstract class IEmailsEventsConsumer {
-  abstract handle(payload: any, ctx: any): Promise<void>;
+export abstract class IEmailsMessagesConsumer {
+  abstract handle(payload: any): Promise<void>;
 }

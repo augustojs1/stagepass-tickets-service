@@ -39,5 +39,9 @@ export const configuration = () => ({
     s3: {
       bucket: process.env.AWS_S3_BUCKET,
     },
+    sqs: {
+      emailQueueUrl: process.env.AWS_SQS_EMAIL_QUEUE_URL,
+      ticketsQueueUrl: process.env.AWS_SQS_TICKETS_QUEUE_URL,
+    },
   },
 });
