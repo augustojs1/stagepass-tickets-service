@@ -13,6 +13,7 @@ export const configuration = () => ({
   aws: {
     region: process.env.AWS_REGION,
     s3: {
+      public_url: process.env.AWS_S3_PUBLIC_URL,
       bucket: process.env.AWS_S3_BUCKET,
     },
     sqs: {

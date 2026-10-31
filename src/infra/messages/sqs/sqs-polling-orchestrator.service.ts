@@ -27,7 +27,9 @@ export class SqsPollingOrchestratorService
   onApplicationBootstrap(): void {
     this.registerPolling<{ order_id: string }>(
       'stagepass-tickets-generate',
-      this.configService.getOrThrow<string>('aws.sqs.emails_queue_url'),
+      this.configService.getOrThrow<string>(
+        'aws.sqs.tickets_generate_queue_url',
+      ),
       (payload) => this.ticketsMessageConsumer.handle(payload),
     );
   }
