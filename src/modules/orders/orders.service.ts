@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { OrdersRepository } from './orders.repository';
-import { OrderEmailTemplateData } from '../emails/models';
 import { currencyFormatter, dateFormatter } from '@/utils';
+import { OrderEmailTemplateData } from '../emails/models/order-email-template-data.model';
 
 @Injectable()
 export class OrdersService {

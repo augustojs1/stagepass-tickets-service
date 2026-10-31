@@ -1,18 +1,21 @@
-## 🎟️ StagePass Worker
+# 🎟️ StagePass Tickets Service
 
-**StagePass** is a REST API for **event creation**, **ticket sales**, and **secure online purchases**.  
-It is built with **NestJS, PostgreSQL, Drizzle, RabbitMQ, and Docker**, focusing on real-world challenges like  
-**ticket reservation concurrency, payment integration, and background processing**.
+**StagePass Tickets Service** is a background worker responsible for **generating digital tickets**, **storing PDF files in Amazon S3**, and **publishing ticket availability notifications** through Amazon SQS.
+
+Built with **NestJS, TypeScript, PostgreSQL, Drizzle ORM, Amazon SQS, and Amazon S3**, the service focuses on asynchronous processing, event-driven communication, and reliable ticket generation.
 
 ### 🔑 Key Features
 
-- 🔐 **User Authentication** — email/password with refresh token auth flow, Google OAuth, and One-Time Password (OTP).
-- 📅 **Event Management** — create, list, search, and filter events with geolocation support.
-- 🎫 **Ticket Reservations** — with expiration timers and concurrency locks to avoid overselling.
-- 💳 **Payments** — secure checkout flow with Stripe sandbox integration.
-- 📄 **Digital Tickets** — automated PDF/QR code generation and email delivery.
+- 📥 **Asynchronous Ticket Processing** — consumes messages from Amazon SQS to trigger ticket generation after successful purchases.
+- 🎫 **Digital Ticket Generation** — automatically generates PDF tickets containing unique QR codes for event check-in.
+- ☁️ **Amazon S3 Integration** — securely stores generated PDF tickets in cloud storage.
+- 📤 **Event-Driven Communication** — publishes ticket availability messages to a dedicated Amazon SQS email queue.
+- 📧 **Decoupled Email Delivery** — delegates email notifications to a separate worker responsible for consuming messages and notifying customers when their tickets are available.
+- 🔄 **Background Processing** — handles ticket generation independently from the main API, preventing resource-intensive operations from blocking HTTP requests.
 
 ---
 
-StagePass simulates a **production-ready ticketing system** inspired by platforms like _Eventbrite_ and _Sympla_,  
-serving as a **portfolio project** to showcase Back-End skills.
+### ⚙️ Processing Workflow
+
+1. **Payment Confirmation** — a successful purchase triggers a ticket generation message.
+2. **SQS Message Consumption** — the Tickets

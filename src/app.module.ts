@@ -7,8 +7,6 @@ import { DrizzleModule } from '@/infra/database/orm/drizzle/drizzle.module';
 import { HttpRequestInterceptor } from '@/infra/interceptors';
 import { MessagesModule } from './infra/messages/messages.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
-import { EmailsModule } from './modules/emails/emails.module';
-import { SMTPModule } from './infra/smtp/smtp.module';
 
 @Module({
   imports: [
@@ -20,8 +18,6 @@ import { SMTPModule } from './infra/smtp/smtp.module';
     DrizzleModule,
     TicketsModule,
     MessagesModule,
-    EmailsModule,
-    SMTPModule,
   ],
   providers: [
     {

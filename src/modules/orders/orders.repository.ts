@@ -10,7 +10,7 @@ import * as schema from '@/infra/database/orm/drizzle/schemas';
 import { DATABASE_TAG } from '@/infra/database/orm/drizzle/drizzle.module';
 import { OrdersEntity } from '@/modules/orders/models/orders-entity.model';
 import { TicketData } from '../tickets/models';
-import { OrderEmailTemplateData } from '../emails/models';
+import { OrderEmailTemplateData } from '../emails/models/order-email-template-data.model';
 
 @Injectable()
 export class OrdersRepository {

@@ -10,38 +10,14 @@ export const configuration = () => ({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
   },
-  jwt: {
-    secret: process.env.JWT_SECRET,
-    expiresIn: process.env.JWT_EXPIRE_IN,
-    expiresInMs: process.env.JWT_EXPIRE_IN_MS,
-    refresh_secret: process.env.JWT_REFRESH_SECRET,
-    refresh_expiresIn: process.env.JWT_REFRESH_EXPIRE_IN,
-    refresh_expiresInMs: process.env.JWT_REFRESH_EXPIRE_IN_MS,
-  },
-  geocoder_api_key: process.env.GEOCODER_PROVIDER_API_KEY,
-  r2: {
-    access_key: process.env.R2_ACCESS_KEY_ID,
-    secret_access_key: process.env.R2_SECRET_ACCESS_KEY_ID,
-    endpoint: process.env.R2_ENDPOINT,
-    region: process.env.R2_REGION,
-    bucket: process.env.R2_BUCKET,
-    public_url: process.env.R2_PUBLIC_URL,
-  },
-  rmq: {
-    url: process.env.RMQ_URL,
-    queue_payment_failed: process.env.RMQ_QUEUE_PAYMENT_FAILED,
-    queue_payment_succes: process.env.RMQ_QUEUE_PAYMENT_SUCCESS,
-    queue_ticket_generate: process.env.RMQ_QUEUE_TICKET_GENERATE,
-    queue_email_send: process.env.RMQ_QUEUE_EMAIL_SEND,
-  },
   aws: {
     region: process.env.AWS_REGION,
     s3: {
       bucket: process.env.AWS_S3_BUCKET,
     },
     sqs: {
-      emailQueueUrl: process.env.AWS_SQS_EMAIL_QUEUE_URL,
-      ticketsQueueUrl: process.env.AWS_SQS_TICKETS_QUEUE_URL,
+      tickets_generate_queue_url: process.env.AWS_SQS_TICKETS_QUEUE_URL,
+      emails_queue_url: process.env.AWS_SQS_EMAIL_QUEUE_URL,
     },
   },
 });

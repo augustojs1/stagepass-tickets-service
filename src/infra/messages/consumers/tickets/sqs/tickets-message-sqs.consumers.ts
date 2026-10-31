@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { TicketsService } from '@/modules/tickets/tickets.service';
-import { ITicketsEventsConsumer } from '../interfaces/itickets-events.consumer';
+import { ITicketsMessageConsumer } from '../interfaces/itickets-messages.consumer';
 
 @Injectable()
-export class TicketsMessageSqsConsumer implements ITicketsEventsConsumer {
+export class TicketsMessageSqsConsumer implements ITicketsMessageConsumer {
   private readonly logger = new Logger(TicketsMessageSqsConsumer.name);
 
   constructor(private readonly ticketsService: TicketsService) {}

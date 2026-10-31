@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SQSClient } from '@aws-sdk/client-sqs';
 
+import { SqsPollingService } from './sqs-polling.service';
+
 @Module({
+  imports: [SqsModule],
   providers: [
     {
       provide: SQSClient,
@@ -13,7 +16,8 @@ import { SQSClient } from '@aws-sdk/client-sqs';
       },
       inject: [ConfigService],
     },
+    SqsPollingService,
   ],
-  exports: [SQSClient],
+  exports: [SQSClient, SqsPollingService],
 })
 export class SqsModule {}

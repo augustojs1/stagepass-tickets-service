@@ -118,7 +118,7 @@ export class TicketsService {
         );
       }
 
-      await this.emailsMessageProducer.emit({
+      this.emailsMessageProducer.emit({
         type: EmailTemplateType.TICKETS_AVAILABLE,
         order_id: order.id,
         to: ownerEmail,

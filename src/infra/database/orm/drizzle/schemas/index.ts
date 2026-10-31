@@ -11,4 +11,3 @@ export * from '@/infra/database/orm/drizzle/schemas/countries.entity';
 export * from '@/infra/database/orm/drizzle/schemas/payment-order.entity';
 export * from '@/infra/database/orm/drizzle/schemas/payment-gateway-webhook-events.entity';
 export * from '@/modules/tickets/entities/ticket.entity';
-export * from '@/modules/emails/entities/email-templates.entity';
