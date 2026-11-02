@@ -16,13 +16,16 @@ export class TicketPdfGeneratorProvider {
 
     const buffers: Buffer[] = [];
 
-    doc.on('data', buffers.push.bind(buffers));
+    doc.on('data', (chunk: Buffer) => buffers.push(chunk));
 
     const qrBuffer = await QRCode.toBuffer(
       `https://stagepass.com/verify/${ticketData.code}`,
     );
 
-    const formattedDate = this.formatEventDate(ticketData.starts_at);
+    const formattedDate = this.formatEventDate(
+      ticketData.starts_at,
+      ticketData.timezone,
+    );
 
     const address = this.formatAddress(ticketData);
 
@@ -37,7 +40,7 @@ export class TicketPdfGeneratorProvider {
 
     doc
       .fontSize(12)
-      .text(`Date`, leftColumnX, startY)
+      .text('Date', leftColumnX, startY)
       .fontSize(14)
       .text(formattedDate, leftColumnX);
 
@@ -45,13 +48,13 @@ export class TicketPdfGeneratorProvider {
 
     doc
       .fontSize(12)
-      .text(`Location`, leftColumnX)
+      .text('Location', leftColumnX)
       .fontSize(14)
       .text(address, leftColumnX, doc.y, { width: 200 });
 
     doc
       .fontSize(12)
-      .text(`Attendee`, rightColumnX, startY)
+      .text('Attendee', rightColumnX, startY)
       .fontSize(14)
       .text(ticketData.owner_name, rightColumnX);
 
@@ -59,7 +62,7 @@ export class TicketPdfGeneratorProvider {
 
     doc
       .fontSize(12)
-      .text(`Email`, rightColumnX)
+      .text('Email', rightColumnX)
       .fontSize(14)
       .text(ticketData.owner_email, rightColumnX);
 
@@ -67,7 +70,7 @@ export class TicketPdfGeneratorProvider {
 
     doc
       .fontSize(12)
-      .text(`Price`, rightColumnX)
+      .text('Price', rightColumnX)
       .fontSize(14)
       .text(`$ ${(ticketData.unit_price / 100).toFixed(2)}`, rightColumnX);
 
@@ -88,13 +91,17 @@ export class TicketPdfGeneratorProvider {
       align: 'center',
     });
 
-    doc.end();
-
-    return new Promise<Buffer>((resolve) => {
+    const result = new Promise<Buffer>((resolve, reject) => {
       doc.on('end', () => {
         resolve(Buffer.concat(buffers));
       });
+
+      doc.on('error', reject);
     });
+
+    doc.end();
+
+    return result;
   }
 
   saveOnDisk(buffer: Buffer<ArrayBufferLike>, bufferName: string): void {
@@ -103,20 +110,33 @@ export class TicketPdfGeneratorProvider {
     fs.writeFileSync(filePath, buffer);
   }
 
-  private formatEventDate(date: Date): string {
-    const hours = date.getUTCHours().toString().padStart(2, '0');
-    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  private formatEventDate(date: Date, timezone: string): string {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: 'long',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    });
 
-    const day = date.getUTCDate().toString().padStart(2, '0');
+    const parts = formatter.formatToParts(date);
 
-    const month = date.toLocaleString('en-US', { month: 'long' });
+    const getPart = (type: Intl.DateTimeFormatPartTypes): string => {
+      return parts.find((part) => part.type === type)?.value ?? '';
+    };
 
-    const year = date.getUTCFullYear();
+    const hours = getPart('hour');
+    const minutes = getPart('minute');
+    const day = getPart('day');
+    const month = getPart('month');
+    const year = getPart('year');
 
-    return `${hours}h${minutes} - ${day} of ${month}, ${year}`;
+    return `${hours}h${minutes} - ${day} of ${month}, ${year} (${timezone})`;
   }
 
-  private formatAddress(event: any): string {
+  private formatAddress(event: TicketData): string {
     return `${event.address_street}, ${event.address_number} - ${event.address_district}, ${event.address_city}`;
   }
 }

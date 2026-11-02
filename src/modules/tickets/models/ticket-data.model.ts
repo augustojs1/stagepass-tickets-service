@@ -14,4 +14,5 @@ export class TicketData {
   code?: string;
   order_owner_email: string;
   order_item_id: string;
+  timezone: string;
 }

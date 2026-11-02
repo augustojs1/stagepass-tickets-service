@@ -124,6 +124,7 @@ export class OrdersRepository {
         owner_name: schema.order_item.owner_name,
         owner_email: schema.order_item.owner_email,
         unit_price: schema.order_item.unit_price,
+        timezone: schema.events.timezone,
       })
       .from(schema.order_item)
       .innerJoin(
