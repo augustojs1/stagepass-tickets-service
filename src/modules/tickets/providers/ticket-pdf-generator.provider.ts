@@ -1,5 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
 import * as QRCode from 'qrcode';
@@ -8,6 +10,12 @@ import { TicketData } from '../models';
 
 @Injectable()
 export class TicketPdfGeneratorProvider {
+  private readonly appHost: string;
+
+  constructor(private readonly configService: ConfigService) {
+    this.appHost = this.configService.getOrThrow<string>('app_host');
+  }
+
   async generate(ticketData: TicketData): Promise<Buffer<ArrayBufferLike>> {
     const doc = new PDFDocument({
       size: 'A4',
@@ -19,7 +27,7 @@ export class TicketPdfGeneratorProvider {
     doc.on('data', (chunk: Buffer) => buffers.push(chunk));
 
     const qrBuffer = await QRCode.toBuffer(
-      `https://stagepass.com/verify/${ticketData.code}`,
+      `${this.appHost}/${ticketData.code}`,
     );
 
     const formattedDate = this.formatEventDate(

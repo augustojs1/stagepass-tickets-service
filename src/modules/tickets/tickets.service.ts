@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -35,37 +34,42 @@ export class TicketsService {
       const order = await this.ordersRepository.findById(order_id);
 
       if (!order) {
-        this.logger.log(`Order order_id=${order_id} not found!`);
-        return;
+        throw new Error(`Order order_id=${order_id} not found!`);
       }
 
       if (order.status !== 'PAID') {
-        this.logger.log(`Order order_id=${order_id} is not paid!`);
-        return;
+        throw new Error(
+          `Order order_id=${order_id} is not paid! Current status=${order.status}`,
+        );
       }
 
       const ticketsToGenerate =
         await this.ordersRepository.findOrderAndOrderItemAndEventById(order_id);
 
-      const ownerEmail = ticketsToGenerate[0].owner_email;
+      if (!ticketsToGenerate.length) {
+        throw new Error(`No order items found for order_id=${order_id}`);
+      }
+
+      const customerEmail = ticketsToGenerate[0].order_owner_email;
 
       for (const ticket of ticketsToGenerate) {
-        const ticketCode = `STP_${randomUUID()}`;
+        const createdTicket =
+          await this.ticketsRepository.findOrCreateByOrderItemId({
+            owner_id: ticket.owner_id,
+            order_item_id: ticket.order_item_id,
+            event_ticket_id: ticket.event_ticket_id,
+          });
 
-        const createdTicket = await this.ticketsRepository.create({
-          owner_id: ticket.owner_id,
-          order_item_id: ticket.order_item_id,
-          event_ticket_id: ticket.event_ticket_id,
-          code: ticketCode,
-        });
+        if (createdTicket.file_url) {
+          this.logger.log(
+            `Ticket already generated. Skipping PDF generation. order_item_id=${ticket.order_item_id}`,
+          );
+
+          continue;
+        }
 
         this.logger.log(
-          `Successfully created ticket 
-          order_id=${order_id},
-          order_item_id=${createdTicket.order_item_id}, 
-          owner_id${createdTicket.owner_id},
-          code=${createdTicket.code}
-          `,
+          `Generating ticket PDF for order_item_id=${ticket.order_item_id}`,
         );
 
         const pdfBuffer = await this.ticketPdfGeneratorProvider.generate({
@@ -73,18 +77,9 @@ export class TicketsService {
           code: createdTicket.code,
         });
 
-        this.logger.log(
-          `Successfully generated PDF ticket 
-          order_id=${order_id},
-          order_item_id=${createdTicket.order_item_id},
-          owner_id${createdTicket.owner_id},
-          code=${createdTicket.code}
-          `,
-        );
-
         const ticketKey = this.ticketStoragePathFactory.generateKey({
-          order_id: order_id,
-          code: ticketCode,
+          order_id,
+          code: createdTicket.code,
           owner_id: createdTicket.owner_id,
         });
 
@@ -97,10 +92,10 @@ export class TicketsService {
         await this.uploadPdfToPresignedUrl(response.uploadUrl, pdfBuffer);
 
         const ticketPublicUrl = this.ticketStoragePathFactory.generateUrl({
-          order_id: order_id,
-          code: ticketCode,
+          order_id,
+          code: createdTicket.code,
           owner_id: createdTicket.owner_id,
-          publicUrl: this.configService.get<string>('aws.s3.public_url'),
+          publicUrl: this.configService.getOrThrow<string>('aws.s3.public_url'),
         });
 
         await this.ticketsRepository.updateFileUrl(
@@ -109,24 +104,25 @@ export class TicketsService {
         );
 
         this.logger.log(
-          `Successfully saved PDF file ticket URL 
-          order_id=${order_id},
-          order_item_id=${createdTicket.order_item_id}, 
-          owner_id${createdTicket.owner_id}
-          code=${createdTicket.code}
-          `,
+          `Successfully generated ticket PDF. ticket_id=${createdTicket.id}, order_item_id=${ticket.order_item_id}`,
         );
       }
 
-      this.emailsMessageProducer.emit({
+      await this.emailsMessageProducer.emit({
         type: EmailTemplateType.TICKETS_AVAILABLE,
         order_id: order.id,
-        to: ownerEmail,
+        to: customerEmail,
       });
+
+      this.logger.log(
+        `Successfully completed ticket generation for order_id=${order_id}`,
+      );
     } catch (error) {
+      const err = error as Error;
+
       this.logger.error(
-        `An error has occured while trying to generate tickets for order ${order_id}`,
-        error,
+        `Failed to generate tickets for order_id=${order_id}`,
+        err.stack,
       );
 
       throw error;

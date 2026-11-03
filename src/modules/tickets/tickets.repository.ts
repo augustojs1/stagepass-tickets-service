@@ -1,11 +1,18 @@
+import { randomUUID } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { and, eq } from 'drizzle-orm';
 
 import { DATABASE_TAG } from '@/infra/database/orm/drizzle/drizzle.module';
 import * as schema from '@/infra/database/orm/drizzle/schemas';
+
 import { InsertTicketParams } from './models/insert-ticket-params.model';
 import { TicketEntity } from './models';
+
+type FindOrCreateTicketParams = Pick<
+  InsertTicketParams,
+  'owner_id' | 'order_item_id' | 'event_ticket_id'
+>;
 
 @Injectable()
 export class TicketsRepository {
@@ -15,14 +22,47 @@ export class TicketsRepository {
   ) {}
 
   async create(data: InsertTicketParams): Promise<TicketEntity> {
-    const result = await this.drizzle
+    const [createdTicket] = await this.drizzle
+      .insert(schema.tickets)
+      .values(data)
+      .returning();
+
+    return createdTicket;
+  }
+
+  async findOrCreateByOrderItemId(
+    data: FindOrCreateTicketParams,
+  ): Promise<TicketEntity> {
+    const [createdTicket] = await this.drizzle
       .insert(schema.tickets)
       .values({
-        ...data,
+        owner_id: data.owner_id,
+        order_item_id: data.order_item_id,
+        event_ticket_id: data.event_ticket_id,
+        code: `STP_${randomUUID()}`,
+      })
+      .onConflictDoNothing({
+        target: schema.tickets.order_item_id,
       })
       .returning();
 
-    return result[0];
+    if (createdTicket) {
+      return createdTicket;
+    }
+
+    const [existingTicket] = await this.drizzle
+      .select()
+      .from(schema.tickets)
+      .where(eq(schema.tickets.order_item_id, data.order_item_id))
+      .limit(1);
+
+    if (!existingTicket) {
+      throw new Error(
+        `Failed to find or create ticket for order_item_id=${data.order_item_id}`,
+      );
+    }
+
+    return existingTicket;
   }
 
   async updateFileUrl(id: string, url: string): Promise<void> {
@@ -30,6 +70,7 @@ export class TicketsRepository {
       .update(schema.tickets)
       .set({
         file_url: url,
+        updated_at: new Date(),
       })
       .where(eq(schema.tickets.id, id));
   }
@@ -52,17 +93,26 @@ export class TicketsRepository {
       .where(eq(schema.order_item.order_id, order_id));
   }
 
-  async findByOrderIdAndOwnerId(order_id: string, owner_id: string) {
-    const ticket = await this.drizzle
-      .select()
+  async findByOrderIdAndOwnerId(
+    order_id: string,
+    owner_id: string,
+  ): Promise<TicketEntity[]> {
+    const tickets = await this.drizzle
+      .select({
+        ticket: schema.tickets,
+      })
       .from(schema.tickets)
+      .innerJoin(
+        schema.order_item,
+        eq(schema.tickets.order_item_id, schema.order_item.id),
+      )
       .where(
         and(
-          eq(schema.tickets.order_item_id, order_id),
+          eq(schema.order_item.order_id, order_id),
           eq(schema.tickets.owner_id, owner_id),
         ),
       );
 
-    return ticket;
+    return tickets.map(({ ticket }) => ticket);
   }
 }
